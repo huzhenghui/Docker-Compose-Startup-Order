@@ -1,0 +1,35 @@
+version: "3"
+services:
+  service_1:
+    image: ubuntu
+    volumes:
+      - Docker-Compose-Startup-Order:/Startup-Order
+    command: |
+      bash -c '
+      echo Service 1 Start;
+      sleep 10;
+      echo Service 1 Up;
+      touch /Startup-Order/service_1;'
+  service_2:
+    image: ubuntu
+    volumes:
+      - Docker-Compose-Startup-Order:/Startup-Order
+    command: |
+      bash -c '
+      while [[ ! -f /Startup-Order/service_1 || /Startup-Order/service_1 -ot /proc/1/cmdline ]]; do sleep 1; done;
+      echo Service 2 Start;
+      sleep 10;
+      echo Service 2 Up;
+      touch /Startup-Order/service_2;'
+  service_3:
+    image: ubuntu
+    volumes:
+      - Docker-Compose-Startup-Order:/Startup-Order
+    command: |
+      bash -c '
+      while [[ ! -f /Startup-Order/service_2 || /Startup-Order/service_2 -ot /proc/1/cmdline ]]; do sleep 1; done;
+      echo Service 3 Start;
+      sleep 10;
+      echo Service 3 Up;'
+volumes:
+  Docker-Compose-Startup-Order:
